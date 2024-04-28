@@ -2,7 +2,7 @@ import './index.scss'
 import { Card, Form, Input, Button, message } from 'antd'
 import logo from '@/assets/logo.png'
 import { useDispatch } from 'react-redux'
-import { getToken } from '@/store/modules/user'
+import { fetchToken } from '@/store/modules/user'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
@@ -10,7 +10,7 @@ const Login = () => {
   const navigate = useNavigate()
   const onFinish = (values) => {
     console.log(values)
-    dispatch(getToken(values))
+    dispatch(fetchToken(values))
 
     navigate('/')
     message.success('Login Success')
