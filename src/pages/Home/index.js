@@ -1,5 +1,3 @@
-import * as echarts from 'echarts';
-import { useEffect } from 'react';
 import BarChart from './components/BarChart';
 
 const Home = () => {
