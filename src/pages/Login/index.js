@@ -8,9 +8,9 @@ import { useNavigate } from 'react-router-dom'
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     console.log(values)
-    dispatch(fetchToken(values))
+    await dispatch(fetchToken(values))
 
     navigate('/')
     message.success('Login Success')

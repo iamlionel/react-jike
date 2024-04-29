@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { getToken } from './token'
+import { clearToken, getToken } from './token'
+import router from '@/router'
 
 //base url
 const request = axios.create({
@@ -22,6 +23,11 @@ request.interceptors.request.use((config) => {
 request.interceptors.response.use((response) => {
     return response.data
 }, (error) => {
+    if (error.response.status === 401) {
+        clearToken()
+        router.navigate('/login')
+        window.location.reload()
+    }
     return Promise.reject(error)
 })
 
