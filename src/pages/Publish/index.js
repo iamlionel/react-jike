@@ -11,17 +11,18 @@ import {
     message
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import './index.scss'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import { useState } from 'react'
-import { publishAPI } from '@/apis/article'
+import { useEffect, useState } from 'react'
+import { getArticleById, publishAPI, updateArticleAPI } from '@/apis/article'
 import { useChannel } from '@/hooks/useChannel'
 
 const { Option } = Select
 
 const Publish = () => {
+    const navigate = useNavigate()
     const { channelList } = useChannel()
 
     const onFinish = async (formValue) => {
@@ -34,12 +35,24 @@ const Publish = () => {
             content,
             cover: {
                 type: imageType,
-                images: imageList.map(item => item.response.data.url)
+                images: imageList.map(item => {
+                    if (item.response) {
+                        return item.response.data.url
+                    } else {
+                        return item.url
+                    }
+                })
             },
             channel_id,
         }
-        await publishAPI(params)
-        message.success('Publish Success')
+        if (articleId) {
+            await updateArticleAPI({ ...params, id: articleId })
+            message.success('Update Success')
+            navigate('/article')
+        } else {
+            await publishAPI(params)
+            message.success('Publish Success')
+        }
     }
 
     const [imageList, setImageList] = useState([])
@@ -54,13 +67,37 @@ const Publish = () => {
         setImageType(e.target.value)
     }
 
+    const [searchParams] = useSearchParams()
+    const articleId = searchParams.get('id')
+    const [form] = Form.useForm()
+    useEffect(() => {
+        console.log(articleId);
+        async function getArticleDetail() {
+            const res = await getArticleById(articleId)
+            const data = res.data
+            const { cover } = data
+            form.setFieldsValue({
+                ...data,
+                type: data.cover.type
+            })
+
+            setImageType(cover.type)
+            setImageList(cover.images.map(url => {
+                return { url }
+            }))
+        }
+        if (articleId) {
+            getArticleDetail()
+        }
+    }, [articleId, form])
+
     return (
         <div className="publish">
             <Card
                 title={
                     <Breadcrumb items={[
                         { title: <Link to={'/'}>首页</Link> },
-                        { title: '发布文章' },
+                        { title: `${articleId ? '编辑' : '发布'}文章` },
                     ]}
                     />
                 }
@@ -70,6 +107,7 @@ const Publish = () => {
                     wrapperCol={{ span: 16 }}
                     initialValues={{ type: 0 }}
                     onFinish={onFinish}
+                    form={form}
                 >
                     <Form.Item
                         label="标题"
@@ -103,6 +141,7 @@ const Publish = () => {
                                 onChange={onUploadChange}
                                 showUploadList
                                 maxCount={imageType}
+                                fileList={imageList}
                             >
                                 <div style={{ marginTop: 8 }}>
                                     <PlusOutlined />

@@ -15,6 +15,14 @@ export function publishAPI(data) {
     })
 }
 
+export function updateArticleAPI(data) {
+    return request({
+        url: `/mp/articles/${data.id}?draft=false`,
+        method: 'PUT',
+        data
+    })
+}
+
 export function getArticleList(params) {
     return request({
         url: '/mp/articles',
@@ -27,5 +35,11 @@ export function delArticleAPI(id) {
     return request({
         url: `/mp/articles/${id}`,
         method: 'DELETE'
+    })
+}
+
+export function getArticleById(id) {
+    return request({
+        url: `/mp/articles/${id}`
     })
 }
